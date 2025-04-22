@@ -51,7 +51,7 @@ const ChatScreen = () => {
         item.isUser ? styles.userMessage : styles.aiMessage,
       ]}
     >
-      <Text style={styles.messageText}>{item.text}</Text>
+      <Text style={item.isUser ? styles.messageUserText : styles.messageAIText}>{item.text}</Text>
     </View>
   );
 
@@ -133,17 +133,22 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   userMessage: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#48A6A7',
     alignSelf: 'flex-end',
     borderBottomRightRadius: 5,
   },
   aiMessage: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#F2EFE7',
     alignSelf: 'flex-start',
+    color: '#006A71',
     borderBottomLeftRadius: 5,
   },
-  messageText: {
+  messageUserText: {
     color: '#ffffff',
+    fontSize: 16,
+  },
+  messageAIText: {
+    color: '#006A71',
     fontSize: 16,
   },
   loadingContainer: {

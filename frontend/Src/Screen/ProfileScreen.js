@@ -10,9 +10,6 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { my_auth, db } from '../components/Firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
 
 const ProfileScreen = ({ navigation }) => {
   const [isEditing, setIsEditing] = useState(false);
