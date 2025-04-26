@@ -11,17 +11,6 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { my_auth, db } from '../components/Firebase';
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  orderBy, 
-  deleteDoc,
-  doc,
-  onSnapshot
-} from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChatHistoryScreen = ({ navigation }) => {

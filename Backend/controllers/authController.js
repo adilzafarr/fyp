@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const userModel = require('../models/userModel');
 const { sendResetCode } = require('../utils/emailService');
 
+
 exports.signup = async (req, res) => {
   const { email, password, name } = req.body;
 
@@ -31,16 +32,12 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    console.log("done 1");
     const result = await userModel.findUserByEmail(email);
-    console.log("done 2");
     if (!result || !(await bcrypt.compare(password, result.password))) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-    console.log("done 3");
     const token = jwt.sign({ id: result.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token });
-    console.log("done 4");
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -68,4 +65,55 @@ exports.resetPassword = async (req, res) => {
   const hashed = await bcrypt.hash(newPassword, 10);
   await userModel.resetPassword(email, hashed);
   res.json({ message: 'Password reset successful' });
+};
+
+exports.getName = async (req, res) => {
+  const { email } = req.body;
+  const name = await userModel.findNameByEmail(email);
+  res.json({name: name.name});
+};
+
+exports.validateToken = async (req, res) => {
+  res.status(200).json({ message: 'Token is valid' });
+}
+
+exports.deleteAccount = async (req, res) => {
+  const { email } = req.body;
+  await userModel.deleteUser(email);
+  res.json({ message: 'Account deleted successfully' });
+}
+
+exports.changePassword = async (req, res) => {
+  const { email, currentPassword, newPassword } = req.body;
+
+  // Check if all fields are provided
+  if (!email || !currentPassword || !newPassword) {
+    return res.status(400).json({ message: 'براہ کرم تمام فیلڈز مکمل کریں۔' });
+  }
+
+  try {
+    const user = await userModel.findUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: 'صارف نہیں ملا۔' });
+    }
+
+    // Correct way: Compare plain oldPassword with stored hashed password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: 'پرانا پاسورڈ درست نہیں ہے۔' });
+    }
+
+    // Hash the new password now
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password in database
+    await userModel.changePassword(email, hashedNewPassword);
+
+    res.json({ message: 'پاسورڈ کامیابی سے تبدیل ہو گیا۔' });
+
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ message: 'سرور کی خرابی۔ براہ کرم بعد میں کوشش کریں۔' });
+  }
 };

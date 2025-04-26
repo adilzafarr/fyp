@@ -11,9 +11,8 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { my_auth, db } from '../components/Firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
+import api from '../../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
@@ -28,26 +27,13 @@ const ProfileScreen = ({ navigation }) => {
 
   const fetchUserData = async () => {
     try {
-      const user = my_auth.currentUser;
-      if (user) {
-        const initialData = {
-          name: user.displayName || 'صارف',
-          email: user.email || '',
-        };
-
-        setUserData(initialData);
-
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          const firestoreData = userDoc.data();
-          const updatedData = {
-            ...initialData,
-            name: firestoreData.name || initialData.name,
-          };
-
-          setUserData(updatedData);
-        }
-      }
+      const email = await AsyncStorage.getItem('userEmail');
+      const name = await AsyncStorage.getItem('usersName');
+      const user = {
+        name: name,
+        email: email
+      };
+      setUserData(user);
     } catch (error) {
       console.error('Error fetching user data:', error);
       Alert.alert('خرابی', 'پروفائل ڈیٹا لوڈ کرنے میں ناکامی');
@@ -58,11 +44,10 @@ const ProfileScreen = ({ navigation }) => {
 
   const handleLogout = async () => {
     try {
-      await signOut(my_auth);
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Auth' }],
-      });
+      await AsyncStorage.removeItem('token');       // remove token
+      await AsyncStorage.removeItem('userEmail');   // remove email
+      await AsyncStorage.removeItem('usersName');   // remove name if you stored it
+      navigation.navigate('Auth');
     } catch (error) {
       console.error('Logout error:', error);
       Alert.alert('خرابی', 'لاگ آؤٹ ناکام ہوا، دوبارہ کوشش کریں۔');
@@ -114,14 +99,7 @@ const ProfileScreen = ({ navigation }) => {
           </View>
         </View>
 
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            <Image
-              source={{ uri: 'https://via.placeholder.com/150' }}
-              style={styles.avatar}
-            />
-          </View>
-        </View>
+        
 
         <TouchableOpacity
           style={[styles.logoutButton, styles.buttonWithShadow]}

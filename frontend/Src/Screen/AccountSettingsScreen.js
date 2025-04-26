@@ -8,7 +8,8 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { my_auth } from '../components/Firebase';
+import api from '../../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AccountSettingsScreen = ({ navigation }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -21,12 +22,25 @@ const AccountSettingsScreen = ({ navigation }) => {
     setShowDeleteModal(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     setShowDeleteModal(false);
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Auth' }],
-    });
+    try {
+      const deleteAccount = await api.post('/auth/delete-account',{
+        email: await AsyncStorage.getItem('userEmail')});
+      if (deleteAccount.status === 200) {
+        // Successfully deleted account
+        await AsyncStorage.clear(); // Clear all stored data
+        alert('آپ کا اکاؤنٹ کامیابی سے حذف ہو گیا ہے');
+        navigation.navigate('Auth');
+      }
+    } catch (error) {
+      console.error('Account deletion error:', error);
+      if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      } else {
+        alert('اکاؤنٹ حذف کرنے میں مسئلہ آیا، دوبارہ کوشش کریں');
+      }
+    }
   };
 
   const handleCancelDelete = () => {

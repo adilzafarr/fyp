@@ -46,9 +46,10 @@ const LoginScreen = ({ navigation }) => {
         email,
         password,
       });
-  
       const token = response.data.token;
       await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('userEmail', email);
+
       console.log('User logged in successfully.');
   
       navigation.replace('Main');

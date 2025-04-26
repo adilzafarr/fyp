@@ -10,8 +10,8 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { my_auth } from '../components/Firebase';
-import { reauthenticateWithCredential, EmailAuthProvider, updatePassword } from 'firebase/auth';
+import api from '../../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChangePassword = ({ navigation }) => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -28,6 +28,7 @@ const ChangePassword = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
+    const email = await AsyncStorage.getItem('userEmail');
     if (!isFormValid()) {
       return;
     }
@@ -40,35 +41,21 @@ const ChangePassword = ({ navigation }) => {
     }
 
     try {
-      const user = my_auth.currentUser;
-      if (!user || !user.email) {
-        alert('صارف لاگ ان نہیں ہے');
-        return;
-      }
+      const stored_email = AsyncStorage.getItem('userEmail');
 
-      // Create credentials with email and current password
-      const credential = EmailAuthProvider.credential(
-        user.email,
-        currentPassword
-      );
-
-      // Reauthenticate the user
-      await reauthenticateWithCredential(user, credential);
-
-      // Update the password
-      await updatePassword(user, newPassword);
-
-      // Show success message
+      const response = await api.post('/auth/change-password', {
+        email,
+        currentPassword,
+        newPassword,
+      });
       handleSuccess();
+
     } catch (error) {
+
       console.log('Error:', error);
-      if (error.code === 'auth/wrong-password') {
-        alert('موجودہ پاسورڈ غلط ہے۔ براہ کرم دوبارہ کوشش کریں۔');
-        navigation.replace('ChangePassword');
-      } else {
-        alert('پاسورڈ تبدیل کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔');
-        navigation.replace('ChangePassword');
-      }
+      alert('پاسورڈ تبدیل کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔');
+      navigation.replace('ChangePassword');
+      
     }
   };
 

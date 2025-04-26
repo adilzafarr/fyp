@@ -9,9 +9,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { my_auth } from '../components/Firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../components/Firebase';
+import api from '../../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
@@ -23,23 +22,13 @@ export default function HomeScreen({ navigation }) {
 
   const fetchUserData = async () => {
     try {
-      const user = my_auth.currentUser;
-      if (user) {
-        // First try to get the name from Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          if (userData.name) {
-            setUserName(userData.name);
-          } else {
-            // If no name in Firestore, use the displayName from auth
-            setUserName(user.displayName || 'صارف');
-          }
-        } else {
-          // If no document exists, use the displayName from auth
-          setUserName(user.displayName || 'صارف');
-        }
-      }
+      const email = await AsyncStorage.getItem('userEmail');
+      const usersName = await api.post('/auth/get-name', {
+        email
+      });
+      await AsyncStorage.setItem('usersName', usersName.data.name);
+      setUserName(usersName.data.name);
+
     } catch (error) {
       console.error('Error fetching user data:', error);
       setUserName('صارف'); // Default fallback name
@@ -77,7 +66,7 @@ export default function HomeScreen({ navigation }) {
 
         {/* Welcome Section */}
         <View style={styles.welcomeSection}>
-          <Text style={styles.welcome}>خوش آمدید {userName}!</Text>
+          <Text style={styles.welcome}>خوش آمدید!</Text>
           <Text style={styles.description}>
             یہ جگہ ہے جہاں آپ اپنے جذبات کو آزادانہ طور پر ظاہر کر سکتے ہیں۔
           </Text>

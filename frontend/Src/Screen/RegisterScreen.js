@@ -47,14 +47,7 @@ const RegisterScreen = ({ navigation }) => {
   
     try {
       const response = await api.post('/auth/signup', { email, password, name });
-  
-      const data = response.data();
-  
-      if (!response.ok) {
-        alert(data.message || 'اکاؤنٹ بنانے میں ناکامی');
-        return;
-      }
-  
+      const data = response.data;
       alert('اکاؤنٹ کامیابی سے بن گیا!');
       navigation.replace('Login');
     } catch (error) {
