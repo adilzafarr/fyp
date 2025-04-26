@@ -4,7 +4,9 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  Image,
   TouchableOpacity,
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -29,36 +31,21 @@ const ArticleDetailScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Article</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content}>
-        <View style={styles.articleHeader}>
-          <Text style={styles.articleTitle}>{article.title}</Text>
-          <View style={styles.articleMeta}>
-            <View
-              style={[
-                styles.moodTag,
-                { backgroundColor: '#E8F2FF' },
-              ]}
-            >
-              <Text style={[styles.moodTagText, { color: '#007AFF' }]}>
-                {article.mood}
-              </Text>
-            </View>
-            <Text style={styles.dateText}>March 18, 2024</Text>
-          </View>
+        <Image source={{ uri: article.image }} style={styles.image} />
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>{article.title}</Text>
+          <Text style={styles.content}>{fullContent}</Text>
         </View>
-
-        <Text style={styles.articleContent}>{fullContent}</Text>
 
         <View style={styles.relatedSection}>
           <Text style={styles.relatedTitle}>Related Articles</Text>
@@ -91,14 +78,11 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 15,
+    padding: 16,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#e0e0e0',
   },
   backButton: {
     padding: 5,
@@ -115,34 +99,22 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 15,
   },
-  articleHeader: {
+  image: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
     marginBottom: 20,
   },
-  articleTitle: {
+  textContainer: {
+    flex: 1,
+  },
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 10,
   },
-  articleMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  moodTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  moodTagText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  dateText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  articleContent: {
+  content: {
     fontSize: 16,
     lineHeight: 24,
     color: '#333',

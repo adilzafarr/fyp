@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, Image, StyleSheet, Animated } from 'react-native';
+import { View, Text, Image, StyleSheet, Animated, StatusBar } from 'react-native';
 
 const SplashScreen = ({ navigation, route }) => {
   const fadeAnim = new Animated.Value(0);
@@ -31,6 +31,7 @@ const SplashScreen = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
         <Image
           source={require('../../assets/logo.png')}
@@ -73,3 +74,6 @@ const styles = StyleSheet.create({
 });
 
 export default SplashScreen; 
+
+
+//this is ok

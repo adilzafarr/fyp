@@ -5,35 +5,68 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
+  StatusBar,
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { my_auth } from '../components/Firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../components/Firebase';
 
 export default function HomeScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
+    fetchUserData();
   }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const user = my_auth.currentUser;
+      if (user) {
+        // First try to get the name from Firestore
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.name) {
+            setUserName(userData.name);
+          } else {
+            // If no name in Firestore, use the displayName from auth
+            setUserName(user.displayName || 'صارف');
+          }
+        } else {
+          // If no document exists, use the displayName from auth
+          setUserName(user.displayName || 'صارف');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setUserName('صارف'); // Default fallback name
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
+      <View style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4DC6BB" />
+        </View>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <ScrollView style={styles.scrollView}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.openDrawer()}>
-          <Ionicons name="menu" size={24} color="#333" />
-        </TouchableOpacity>
         <View style={styles.profileContainer}>
-          <Text style={styles.userName}>عادل ظفر</Text>
+          <Text style={styles.userName}>{userName}</Text>
           <Ionicons name="person-circle" size={28} color="#4DC6BB" />
         </View>
       </View>
@@ -44,7 +77,7 @@ export default function HomeScreen({ navigation }) {
 
         {/* Welcome Section */}
         <View style={styles.welcomeSection}>
-          <Text style={styles.welcome}>خوش آمدید!</Text>
+          <Text style={styles.welcome}>خوش آمدید {userName}!</Text>
           <Text style={styles.description}>
             یہ جگہ ہے جہاں آپ اپنے جذبات کو آزادانہ طور پر ظاہر کر سکتے ہیں۔
           </Text>
@@ -86,14 +119,18 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#ffffff',
+  },
+  scrollView: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -101,11 +138,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    backgroundColor: '#FAF6EF',
-    padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    padding: 8,
+    paddingTop: 0,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 0,
   },
   profileContainer: {
     flexDirection: 'row',

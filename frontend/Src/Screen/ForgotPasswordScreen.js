@@ -5,59 +5,101 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
+  ActivityIndicator,
 } from 'react-native';
+import { my_auth } from '../components/Firebase';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleResetPassword = () => {
-    if (!email) {
-      Alert.alert('خرابی', 'براہ کرم اپنا ای میل ایڈریس درج کریں');
+  const handleResetPassword = async () => {
+    // Validate email
+    if (!email || email.trim() === '') {
+      alert("براہ کرم اپنا ای میل ایڈریس درج کریں");
       return;
     }
 
-    // TODO: Implement actual password reset logic
-    Alert.alert(
-      'کامیابی',
-      'پاس ورڈ ری سیٹ کرنے کی ہدایات آپ کے ای میل پر بھیج دی گئی ہیں',
-      [
-        {
-          text: 'ٹھیک ہے',
-          onPress: () => navigation.navigate('Login'),
-        },
-      ]
-    );
+    // Email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert("براہ کرم درست ای میل ایڈریس درج کریں");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Send reset email
+      await sendPasswordResetEmail(my_auth, email.trim());
+      
+      // Show success message
+      alert("پاس ورڈ ری سیٹ کرنے والی ای میل بھیج دی گئی ہے۔ براہ کرم اپنی ای میل ان باکس اور اسپیم فولڈر چیک کریں۔");
+      setEmail(''); // Clear the email field
+      navigation.navigate('Login');
+      
+    } catch (error) {
+      console.error('Password reset error:', error);
+      let errorMessage = '';
+      
+      // Handle specific error cases
+      switch (error.code) {
+        case 'auth/invalid-email':
+          errorMessage = 'ای میل ایڈریس کا فارمیٹ غلط ہے';
+          break;
+        case 'auth/user-not-found':
+          errorMessage = 'اس ای میل کے ساتھ کوئی اکاؤنٹ موجود نہیں ہے';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'کوششیں بہت زیادہ ہو گئی ہیں۔ براہ کرم کچھ دیر بعد دوبارہ کوشش کریں';
+          break;
+        default:
+          errorMessage = 'ری سیٹ ای میل بھیجنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>کوئی بات نہیں،</Text>
+        <Text style={styles.title}>پاس ورڈ دوبارہ سیٹ کریں</Text>
         <Text style={styles.subtitle}>
-          ہم آپ کی مدد کریں گے۔
-          براہِ کرم اپنا ای میل درج کریں تاکہ
-          ہم آپ کو پاس ورڈ ری سیٹ کرنے
-          کا لنک بھیج سکیں۔
+          اپنا ای میل ایڈریس درج کریں اور ہم آپ کو پاس ورڈ ری سیٹ کرنے کے لیے لنک بھیج دیں گے
         </Text>
 
         <TextInput
-          style={styles.input}
-          placeholder="ای میل"
+          style={[styles.input, loading && styles.inputDisabled]}
+          placeholder="اپنا ای میل درج کریں"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
-          placeholderTextColor="#666666"
+          autoCorrect={false}
+          editable={!loading}
+          placeholderTextColor="#666"
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
-          <Text style={styles.buttonText}>ری سیٹ لنک بھیجیں</Text>
+        <TouchableOpacity 
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleResetPassword}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" size="small" />
+          ) : (
+            <Text style={styles.buttonText}>ری سیٹ لنک بھیجیں</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          disabled={loading}
         >
           <Text style={styles.backButtonText}>لاگ ان پر واپس جائیں</Text>
         </TouchableOpacity>
@@ -74,35 +116,43 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    padding: 20,
   },
   title: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333333',
     textAlign: 'center',
+    color: '#333',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666666',
+    color: '#666',
     marginBottom: 30,
     textAlign: 'center',
+    lineHeight: 22,
   },
   input: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#f5f5f5',
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 8,
     marginBottom: 20,
     fontSize: 16,
-    textAlign: 'right',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  inputDisabled: {
+    opacity: 0.7,
   },
   button: {
     backgroundColor: '#4DC6BB',
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 8,
     alignItems: 'center',
     marginBottom: 15,
+  },
+  buttonDisabled: {
+    backgroundColor: '#A5E4DE',
   },
   buttonText: {
     color: '#ffffff',
@@ -111,6 +161,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     alignItems: 'center',
+    padding: 10,
   },
   backButtonText: {
     color: '#4DC6BB',
@@ -118,4 +169,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ForgotPasswordScreen; 
+export default ForgotPasswordScreen;

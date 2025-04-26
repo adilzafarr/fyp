@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  StatusBar,
 } from 'react-native';
 
 const ArticlesScreen = ({ navigation }) => {
@@ -52,6 +53,7 @@ const ArticlesScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Mental Health Articles</Text>
       </View>
@@ -72,17 +74,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   header: {
-    paddingTop: 60,
-    paddingBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 8,
+    paddingTop: 0,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#e0e0e0',
+    marginTop: 0,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: '#333',
-    textAlign: 'center',
+    marginTop: 0,
+  },
+  content: {
+    flex: 1,
+    padding: 15,
+    marginTop: 0,
+    paddingTop: 0,
   },
   articlesList: {
     padding: 15,

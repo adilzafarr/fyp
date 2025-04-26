@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 
 const WelcomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.content}>
         <Text style={styles.title}>ہم دم</Text>
         <Text style={styles.subtitle}>آپ کے جذبات کا ہم سفر</Text>
