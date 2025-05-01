@@ -49,6 +49,7 @@ const RegisterScreen = ({ navigation }) => {
       const response = await api.post('/auth/signup', { email, password, name });
       const data = response.data;
       alert('اکاؤنٹ کامیابی سے بن گیا!');
+      console.log("check");
       navigation.replace('Login');
     } catch (error) {
       console.error('Registration error:', error);
