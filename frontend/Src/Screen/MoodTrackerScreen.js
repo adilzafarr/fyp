@@ -16,8 +16,6 @@ import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as Asset from 'expo-asset';
 import { Asset as ExpoAsset } from 'expo-asset';
-import { my_auth, db } from '../components/Firebase';
-import { doc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Use the correct path to the data.json file

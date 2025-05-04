@@ -5,35 +5,59 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Image,
   StatusBar,
+  Modal,
+  ScrollView,
+  TextInput,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import articlesData from '../../Data/Articles/articles.json';
 
-const ArticlesScreen = ({ navigation }) => {
-  // Sample articles data - replace with actual data from your backend
-  const articles = [
-    {
-      id: '1',
-      title: 'Understanding Anxiety',
-      preview: 'Learn about the different types of anxiety and how to manage them effectively.',
-      image: 'https://example.com/anxiety.jpg',
-      mood: 'Calming',
-    },
-    {
-      id: '2',
-      title: 'Mindfulness Meditation',
-      preview: 'Simple techniques to stay present and reduce stress in your daily life.',
-      image: 'https://example.com/meditation.jpg',
-      mood: 'Relaxing',
-    },
-    {
-      id: '3',
-      title: 'Building Healthy Habits',
-      preview: 'Tips for developing and maintaining positive mental health habits.',
-      image: 'https://example.com/habits.jpg',
-      mood: 'Motivating',
-    },
-  ];
+const ArticlesScreen = () => {
+  const navigation = useNavigation();
+  const [articles, setArticles] = useState([]);
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [sortOrder, setSortOrder] = useState('newest');
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+
+  useEffect(() => {
+    setArticles(articlesData.articles);
+  }, []);
+
+  const toggleCategory = (category) => {
+    if (selectedCategories.includes(category)) {
+      setSelectedCategories(selectedCategories.filter(cat => cat !== category));
+    } else {
+      setSelectedCategories([...selectedCategories, category]);
+    }
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest');
+  };
+
+  const getFilteredAndSortedArticles = () => {
+    let filteredData = articles;
+    
+    if (selectedCategories.length > 0) {
+      filteredData = articles.filter(article => 
+        selectedCategories.includes(article.category)
+      );
+    }
+
+    filteredData.sort((a, b) => {
+      const dateA = new Date(a.dateCreated);
+      const dateB = new Date(b.dateCreated);
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    return filteredData;
+  };
 
   const renderArticle = ({ item }) => (
     <TouchableOpacity
@@ -44,26 +68,74 @@ const ArticlesScreen = ({ navigation }) => {
         <Text style={styles.articleTitle}>{item.title}</Text>
         <Text style={styles.articlePreview}>{item.preview}</Text>
         <View style={styles.articleFooter}>
-          <Text style={styles.moodTag}>{item.mood}</Text>
+          <Text style={styles.moodTag}>{item.category}</Text>
           <Text style={styles.readMore}>Read More →</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 
+  const allCategories = [...new Set(articles.map(article => article.category))];
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Mental Health Articles</Text>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity 
+            style={styles.filterButton}
+            onPress={() => setShowFilterModal(true)}
+          >
+            <Text style={styles.filterButtonText}>Filter</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
-        data={articles}
+        data={getFilteredAndSortedArticles()}
         renderItem={renderArticle}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.articlesList}
       />
+
+      <Modal
+        visible={showFilterModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Filter by Category</Text>
+            <ScrollView style={styles.categoryList}>
+              {allCategories.map((category) => (
+                <TouchableOpacity
+                  key={category}
+                  style={[
+                    styles.categoryItem,
+                    selectedCategories.includes(category) && styles.selectedCategory
+                  ]}
+                  onPress={() => toggleCategory(category)}
+                >
+                  <Text style={[
+                    styles.categoryItemText,
+                    selectedCategories.includes(category) && styles.selectedCategoryText
+                  ]}>
+                    {category}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowFilterModal(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -90,11 +162,29 @@ const styles = StyleSheet.create({
     color: '#333',
     marginTop: 0,
   },
-  content: {
-    flex: 1,
-    padding: 15,
-    marginTop: 0,
-    paddingTop: 0,
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  filterButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  sortButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  filterButtonText: {
+    color: '#ffffff',
+    fontWeight: '500',
+  },
+  sortButtonText: {
+    color: '#ffffff',
+    fontWeight: '500',
   },
   articlesList: {
     padding: 15,
@@ -120,12 +210,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     marginBottom: 8,
+    textAlign: 'right',
   },
   articlePreview: {
     fontSize: 14,
     color: '#666',
     marginBottom: 12,
     lineHeight: 20,
+    textAlign: 'right',
   },
   articleFooter: {
     flexDirection: 'row',
@@ -143,6 +235,54 @@ const styles = StyleSheet.create({
   readMore: {
     fontSize: 14,
     color: '#007AFF',
+    fontWeight: '500',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+    maxHeight: '80%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  categoryList: {
+    maxHeight: 300,
+  },
+  categoryItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  selectedCategory: {
+    backgroundColor: '#007AFF',
+  },
+  categoryItemText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  selectedCategoryText: {
+    color: '#ffffff',
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: '#007AFF',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#ffffff',
     fontWeight: '500',
   },
 });

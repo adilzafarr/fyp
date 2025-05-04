@@ -9,25 +9,11 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-const ArticleDetailScreen = ({ route, navigation }) => {
+const ArticleDetailScreen = ({ route }) => {
+  const navigation = useNavigation();
   const { article } = route.params;
-
-  // Sample full article content - replace with actual content from your backend
-  const fullContent = `
-    ${article.title}
-
-    Introduction:
-    Mental health is an essential part of our overall well-being. Taking care of your mental health is just as important as taking care of your physical health.
-
-    Main Content:
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl.
-
-    Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl.
-
-    Conclusion:
-    Taking care of your mental health is an ongoing process. By implementing these strategies, you can improve your overall well-being and lead a more balanced life.
-  `;
 
   return (
     <View style={styles.container}>
@@ -36,36 +22,22 @@ const ArticleDetailScreen = ({ route, navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Article</Text>
+        <Text style={styles.headerTitle}>Article Detail</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content}>
-        <Image source={{ uri: article.image }} style={styles.image} />
-        <View style={styles.textContainer}>
+        <View style={styles.articleContainer}>
           <Text style={styles.title}>{article.title}</Text>
-          <Text style={styles.content}>{fullContent}</Text>
+          <View style={styles.metaInfo}>
+            <Text style={styles.category}>{article.category}</Text>
+            <Text style={styles.date}>{article.dateCreated}</Text>
+          </View>
+          <Text style={styles.author}>By {article.author}</Text>
+          <Text style={styles.text}>{article.text}</Text>
+          <Text style={styles.text}>{article.content}</Text>
         </View>
 
-        <View style={styles.relatedSection}>
-          <Text style={styles.relatedTitle}>Related Articles</Text>
-          <TouchableOpacity style={styles.relatedItem}>
-            <Text style={styles.relatedItemTitle}>
-              Understanding Depression
-            </Text>
-            <Text style={styles.relatedItemPreview}>
-              Learn about the signs and symptoms of depression and how to seek help.
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.relatedItem}>
-            <Text style={styles.relatedItemTitle}>
-              Stress Management Techniques
-            </Text>
-            <Text style={styles.relatedItemPreview}>
-              Effective strategies to reduce stress in your daily life.
-            </Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
     </View>
   );
@@ -85,40 +57,57 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
   },
   backButton: {
-    padding: 5,
+    fontSize: 16,
+    color: '#007AFF',
+    padding: 8,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
+    flex: 1,
+    textAlign: 'center',
   },
   placeholder: {
-    width: 34,
+    width: 40,
   },
   content: {
     flex: 1,
-    padding: 15,
   },
-  image: {
-    width: '100%',
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  textContainer: {
-    flex: 1,
+  articleContainer: {
+    padding: 16,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 10,
+    marginBottom: 8,
+    textAlign: 'right',
   },
-  content: {
+  metaInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  category: {
+    fontSize: 14,
+    color: '#666',
+  },
+  date: {
+    fontSize: 14,
+    color: '#666',
+  },
+  author: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 16,
+    textAlign: 'right',
+  },
+  text: {
     fontSize: 16,
     lineHeight: 24,
     color: '#333',
-    marginBottom: 30,
+    textAlign: 'right',
   },
   relatedSection: {
     marginTop: 20,
