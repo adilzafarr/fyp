@@ -57,7 +57,7 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.header}>
         <View style={styles.profileContainer}>
           <Text style={styles.userName}>{userName}</Text>
-          <Ionicons name="person-circle" size={28} color="#4DC6BB" />
+          <Ionicons name="person-circle" size={28} color="#006A71" />
         </View>
       </View>
 
@@ -78,7 +78,7 @@ export default function HomeScreen({ navigation }) {
           {/* Chat Bot */}
           <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('ChatTab')}>
             <View style={styles.row}>
-              <Ionicons name="chatbubble-ellipses" size={32} color="#2B7A78" />
+              <Ionicons name="chatbubble-ellipses" size={32} color="#006A71" />
               <View style={styles.textBlock}>
                 <Text style={styles.cardTitle}>چیٹ بوٹ</Text>
                 <Text style={styles.cardDesc}>اپنے جذبات کے بارے میں بات کریں</Text>
@@ -89,7 +89,7 @@ export default function HomeScreen({ navigation }) {
           {/* Articles */}
           <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('ArticlesTab')}>
             <View style={styles.row}>
-              <Ionicons name="book" size={32} color="#2B7A78" />
+              <Ionicons name="book" size={32} color="#006A71" />
               <View style={styles.textBlock}>
                 <Text style={styles.cardTitle}>مضامین</Text>
                 <Text style={styles.cardDesc}>مختلف جذبات کے بارے میں پڑھیں</Text>
@@ -100,7 +100,7 @@ export default function HomeScreen({ navigation }) {
           {/* Mood Tracker */}
           <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('MoodTab')}>
             <View style={styles.row}>
-              <Ionicons name="happy" size={32} color="#2B7A78" />
+              <Ionicons name="happy" size={32} color="#006A71" />
               <View style={styles.textBlock}>
                 <Text style={styles.cardTitle}>موڈ ٹریکر</Text>
                 <Text style={styles.cardDesc}>دیکھیں وقت کے ساتھ آپ کے جذبات کیسے بدلے</Text>
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     padding: 8,
     paddingTop: 0,
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#4DC6BB',
+    color: '#006A71',
     marginRight: 5,
   },
   scrollContainer: {
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#2B7A78',
+    color: '#006A71',
     textAlign: 'center',
     marginBottom: 6,
   },
@@ -174,12 +174,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     textAlign: 'center',
-    color: '#2B7A78',
+    color: '#006A71',
     marginBottom: 6,
   },
   description: {
     fontSize: 14,
-    color: '#2B7A78',
+    color: '#006A71',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -208,13 +208,13 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#2B7A78',
+    color: '#006A71',
     textAlign: 'right',
     marginBottom: 2,
   },
   cardDesc: {
     fontSize: 12,
-    color: '#333',
+    color: '#006A71',
     textAlign: 'right',
     lineHeight: 16,
   },

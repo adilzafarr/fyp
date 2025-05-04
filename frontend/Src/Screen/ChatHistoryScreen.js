@@ -187,9 +187,9 @@ const ChatHistoryScreen = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color="#006A71" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Chat History</Text>
+        <Text style={styles.headerTitle}>پچھلی بات چیت</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#006A71',
   },
   headerRight: {
     width: 40,

@@ -81,7 +81,6 @@ const ArticlesScreen = () => {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mental Health Articles</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity 
             style={styles.filterButton}
@@ -90,6 +89,7 @@ const ArticlesScreen = () => {
             <Text style={styles.filterButtonText}>Filter</Text>
           </TouchableOpacity>
         </View>
+        <Text style={styles.headerTitle}>مضامین</Text>
       </View>
 
       <FlatList
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#006A71',
     marginTop: 0,
   },
   headerButtons: {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   filterButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#006A71',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   articleCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#F5FBFB',
     borderRadius: 15,
     marginBottom: 15,
     shadowColor: '#000',
@@ -208,13 +208,13 @@ const styles = StyleSheet.create({
   articleTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: '#006A71',
     marginBottom: 8,
     textAlign: 'right',
   },
   articlePreview: {
     fontSize: 14,
-    color: '#666',
+    color: '#006A71',
     marginBottom: 12,
     lineHeight: 20,
     textAlign: 'right',
@@ -226,8 +226,8 @@ const styles = StyleSheet.create({
   },
   moodTag: {
     fontSize: 12,
-    color: '#007AFF',
-    backgroundColor: '#E8F2FF',
+    color: '#F2EFE7',
+    backgroundColor: '#006A71',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,

@@ -1,9 +1,9 @@
-// services/ollamaService.js
+
 const axios = require('axios');
+require('dotenv').config();
 
 const OLLAMA_BASE_URL = 'http://127.0.0.1:11434'; // change if deployed remotely
-const MODEL_NAME = 'humdum'; // or whatever model you're using
-
+const MODEL_NAME = 'humdum_3.1';
 exports.sendToOllama = async (userPrompt) => {
   try {
     const response = await axios.post(`${OLLAMA_BASE_URL}/api/chat`, {

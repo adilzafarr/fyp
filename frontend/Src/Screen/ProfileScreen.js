@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     padding: 8,
     paddingTop: 0,
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#006A71',
     marginTop: 0,
   },
   userNameContainer: {
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#006A71',
   },
   content: {
     flex: 1,

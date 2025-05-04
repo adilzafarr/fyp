@@ -200,7 +200,7 @@ const getConversationID = async (id) => {
             <Ionicons name="time-outline" size={24} color="#333" />
           </Pressable>
 
-          <Text style={[styles.headerTitle, { textAlign: 'right' }]}>اے آئی سے بات چیت</Text>
+          <Text style={[styles.headerTitle, { textAlign: 'right' }]}>بات چیت</Text>
 
           <View style={styles.headerRight}>
             <TouchableOpacity 
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#006A71',
   },
   historyButton: {
     padding: 5,

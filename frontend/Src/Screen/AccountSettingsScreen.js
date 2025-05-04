@@ -56,7 +56,7 @@ const AccountSettingsScreen = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color="#006A71" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>اکاؤنٹ سیٹنگز</Text>
       </View>
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#006A71',
     marginTop: 0,
   },
   content: {
@@ -187,13 +187,13 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#006A71',
     marginBottom: 10,
     textAlign: 'right',
   },
   modalMessage: {
     fontSize: 16,
-    color: '#666',
+    color: '#006A71',
     marginBottom: 20,
     textAlign: 'right',
   },

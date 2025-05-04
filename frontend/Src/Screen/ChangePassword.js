@@ -85,7 +85,7 @@ const ChangePassword = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color="#006A71" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>پاسورڈ تبدیل کریں</Text>
       </View>
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#006A71',
     marginTop: 0,
   },
   content: {
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#333',
+    color: '#006A71',
     marginBottom: 8,
     textAlign: 'right',
   },
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   submitButton: {
-    backgroundColor: '#4DC6BB',
+    backgroundColor: '#006A71',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#A5E4DE',
   },
   submitButtonText: {
-    color: '#ffffff',
+    color: '#F2EFE7',
     fontSize: 16,
     fontWeight: '600',
   },
