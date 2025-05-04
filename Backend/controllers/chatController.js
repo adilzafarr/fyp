@@ -1,59 +1,48 @@
-const db = require('../models/db');
-const axios = require('axios');
-require('dotenv').config();
+const chatModel = require('../models/chatModel');
+const { sendToOllama } = require('../services/ollamaService');
 
-exports.chat = async (req, res) => {
+exports.saveMessage = async (req, res) => {
   try {
-    const { userId, message, conversationId } = req.body;
+    const { conversationId, sender, text,timestamp } = req.body;
 
-    if (!userId || !message) {
-      return res.status(400).json({ error: 'userId and message are required' });
+    if (!conversationId || !sender || !text || !timestamp) {
+      return res.status(400).json({ error: 'All fields are required' });
     }
 
-    let convId = conversationId;
+    await chatModel.saveMessage(conversationId, sender, text,timestamp);
 
-    // Create new conversation if no conversationId
-    if (!conversationId) {
-      const conv = await db.query(
-        'INSERT INTO conversations (user_id) VALUES ($1) RETURNING id',
-        [userId]
-      );
-      convId = conv.rows[0].id;
-    }
-
-    // Save user message
-    await db.query(
-      'INSERT INTO messages (conversation_id, sender, content) VALUES ($1, $2, $3)',
-      [convId, 'user', message]
-    );
-
-    // Call Hugging Face API
-    const response = await axios.post(
-      process.env.HUGGINGFACE_API,
-      { inputs: message },
-      { headers: { Authorization: `Bearer ${process.env.HUGGINGFACE_TOKEN}` } }
-    );
-
-    let botReply = 'معاف کریں، میں آپ کی بات نہیں سمجھ سکا۔'; // default reply
-
-    if (response.data) {
-      if (Array.isArray(response.data)) {
-        botReply = response.data[0]?.generated_text || botReply;
-      } else {
-        botReply = response.data.generated_text || botReply;
-      }
-    }
-
-    // Save bot reply
-    await db.query(
-      'INSERT INTO messages (conversation_id, sender, content) VALUES ($1, $2, $3)',
-      [convId, 'bot', botReply]
-    );
-
-    return res.json({ reply: botReply, conversationId: convId });
+    return res.status(201).json({ message: 'Message saved successfully' });
 
   } catch (error) {
     console.error('Chat error:', error.message);
     return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+exports.newConversation = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const response = await chatModel.newConversation(userId);
+    return res.json({ convID: response });
+  } catch (error) {
+    console.error('Chat error:', error.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+exports.getBotResponse = async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    const botReply = await sendToOllama(message);
+
+    return res.status(200).json({ response: botReply });
+  } catch (error) {
+    console.error('Bot response error:', error.message);
+    return res.status(500).json({ error: 'Failed to get bot response' });
   }
 };

@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import api from '../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 const AccountSettingsScreen = ({ navigation }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 

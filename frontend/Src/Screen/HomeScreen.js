@@ -27,6 +27,7 @@ export default function HomeScreen({ navigation }) {
         email
       });
       await AsyncStorage.setItem('usersName', usersName.data.name);
+      await AsyncStorage.setItem('usersId', usersName.data.id);
       setUserName(usersName.data.name);
 
     } catch (error) {

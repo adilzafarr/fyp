@@ -69,8 +69,8 @@ exports.resetPassword = async (req, res) => {
 
 exports.getName = async (req, res) => {
   const { email } = req.body;
-  const name = await userModel.findNameByEmail(email);
-  res.json({name: name.name});
+  const {name ,id} = await userModel.findNameByEmail(email);
+  res.json({name: name, id: id});
 };
 
 exports.validateToken = async (req, res) => {

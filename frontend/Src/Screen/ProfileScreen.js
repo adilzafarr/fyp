@@ -44,9 +44,7 @@ const ProfileScreen = ({ navigation }) => {
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem('token');       // remove token
-      await AsyncStorage.removeItem('userEmail');   // remove email
-      await AsyncStorage.removeItem('usersName');   // remove name if you stored it
+      await AsyncStorage.clear(); 
       navigation.navigate('Auth');
     } catch (error) {
       console.error('Logout error:', error);

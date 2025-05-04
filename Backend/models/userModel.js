@@ -8,7 +8,7 @@ const findUserByEmail = async (email) => {
 
 
 const findNameByEmail = async (email) => {
-  const res = await db.query('SELECT name FROM users WHERE email = $1', [email]);
+  const res = await db.query('SELECT name, id FROM users WHERE email = $1', [email]);
   return res.rows[0];
 };
 
