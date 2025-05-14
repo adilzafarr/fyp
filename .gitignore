@@ -5,5 +5,4 @@ frontend/.env
 frontend/.gitignore
 
 Backend/node_modules
-Backend/.env
 Backend/.gitignore
