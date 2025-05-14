@@ -1,8 +1,8 @@
 const db = require('./db');
 
 
-const saveMessage = async (conversationId, sender, content, created_at) => {
-    await db.query('INSERT INTO messages (conversation_id, sender, content,created_at) VALUES ($1, $2, $3, $4)', [conversationId, sender, content,created_at]);
+const saveMessage = async (conversationId, sender, content, created_at, userId) => {
+    await db.query('INSERT INTO messages (conversation_id, sender, content,created_at, "userId", emotion) VALUES ($1, $2, $3, $4,$5,$6)', [conversationId, sender, content,created_at, userId, -1]);
 }
 const newConversation = async (userId) => {
     const response = await db.query('INSERT INTO conversations (user_id) VALUES ($1) RETURNING id', [userId]);

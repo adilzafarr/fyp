@@ -3,16 +3,15 @@ const { sendToOllama } = require('../services/ollamaService');
 
 exports.saveMessage = async (req, res) => {
   try {
-    const { conversationId, sender, text,timestamp } = req.body;
+    const { userId, conversationId, sender, text,timestamp } = req.body;
 
     if (!conversationId || !sender || !text || !timestamp) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    await chatModel.saveMessage(conversationId, sender, text,timestamp);
+    await chatModel.saveMessage(conversationId, sender, text,timestamp,userId);
 
     return res.status(201).json({ message: 'Message saved successfully' });
-
   } catch (error) {
     console.error('Chat error:', error.message);
     return res.status(500).json({ error: 'Internal server error' });

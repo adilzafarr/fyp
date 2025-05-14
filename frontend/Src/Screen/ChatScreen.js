@@ -78,8 +78,9 @@ const getConversationID = async (id) => {
   await AsyncStorage.setItem('convID', convId);
 };
 
-  const saveMessageToDB = async ({conversationId,sender,text,timestamp}) => {
+  const saveMessageToDB = async ({userId, conversationId,sender,text,timestamp}) => {
     const message = await api.post('/chat/save-message', {
+      userId,
       conversationId,
       sender,
       text,
@@ -111,6 +112,7 @@ const getConversationID = async (id) => {
     if (!inputText.trim()) return;
 
     const userMessage = {
+      userId: userId,
       conversationId: convId,
       sender: 'user',
       text: inputText,
@@ -131,6 +133,7 @@ const getConversationID = async (id) => {
       const aiResponse = await callPuterAI(inputText);
 
       const aiMessage = {
+        userId: userId,
         conversationId: convId,
         sender: 'bot',
         text: aiResponse,
