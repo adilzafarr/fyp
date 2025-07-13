@@ -1,10 +1,11 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import authRoutes from './routes/authRoutes.js';
+import chatbotRoutes from './routes/chatRoutes.js';
+import moodRoutes from './routes/moodRoutes.js';
 
-const authRoutes = require('./routes/authRoutes');
-const chatbotRoutes = require('./routes/chatRoutes');
-const moodRoutes = require('./routes/moodRoutes');
+dotenv.config();
 
 const app = express();
 app.use(cors());

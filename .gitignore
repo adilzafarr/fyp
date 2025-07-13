@@ -8,6 +8,6 @@ Backend/node_modules
 Backend/.gitignore
 Backend/.env
 
-ml/ml_pipeline
+ml/mlvenv
 ml/__pycache__
-ml/mbert
+ml/mBERT_LR_2e-5

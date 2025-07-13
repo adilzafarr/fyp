@@ -19,7 +19,7 @@ const RegisterScreen = ({ navigation }) => {
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email) && email.toLowerCase().endsWith('@gmail.com');
+    return emailRegex.test(email);
   };
 
   const handleRegister = async () => {

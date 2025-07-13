@@ -1,11 +1,9 @@
-
-const db = require('./db');
+import db from './db.js';
 
 const findUserByEmail = async (email) => {
   const res = await db.query('SELECT * FROM users WHERE email = $1', [email]);
   return res.rows[0];
 };
-
 
 const findNameByEmail = async (email) => {
   const res = await db.query('SELECT name, id FROM users WHERE email = $1', [email]);
@@ -19,6 +17,7 @@ const createUser = async (email, hashedPassword, name) => {
   );
   return result.rows[0];
 };
+
 const updateResetCode = async (email, code, expires) => {
   await db.query('UPDATE users SET reset_code = $1, reset_code_expires = $2 WHERE email = $3', [code, expires, email]);
 };
@@ -33,9 +32,9 @@ const deleteUser = async (email) => {
 
 const changePassword = async (email, newPassword) => {
   await db.query('UPDATE users SET password = $1 WHERE email = $2', [newPassword, email]);
-}
+};
 
-module.exports = {
+export {
   findUserByEmail,
   findNameByEmail,
   createUser,

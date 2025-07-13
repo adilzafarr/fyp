@@ -19,5 +19,9 @@
     "nodemailer": "^6.10.1",
     "nodemon": "^3.1.9",
     "pg": "^8.14.1"
-  }
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.17"
+  },
+  "type": "module"
 }

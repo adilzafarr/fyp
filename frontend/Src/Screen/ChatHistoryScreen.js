@@ -94,9 +94,6 @@ const ChatHistoryScreen = ({ navigation }) => {
         <Text style={styles.chatSummary} numberOfLines={1}>
           {item.summary}
         </Text>
-        <Text style={styles.lastMessage} numberOfLines={1}>
-          {item.lastMessage}
-        </Text>
         <Text style={styles.timestamp}>
           {item.timestamp instanceof Date && !isNaN(item.timestamp) ? item.timestamp.toLocaleDateString() : 'Invalid Date'} - {item.messageCount} messages
         </Text>

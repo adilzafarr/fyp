@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import * as mood from '../controllers/moodController.js';
+
 const router = express.Router();
-const mood = require('../controllers/moodController');
 
 router.post('/get-mood-history', mood.getMoodHistory);
 
-module.exports = router;
+export default router;

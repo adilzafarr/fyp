@@ -1,11 +1,10 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const userModel = require('../models/userModel');
-const { sendResetCode } = require('../utils/emailService');
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import * as userModel from '../models/userModel.js';
+import { sendResetCode } from '../utils/emailService.js';
 
-
-exports.signup = async (req, res) => {
+export const signup = async (req, res) => {
   const { email, password, name } = req.body;
 
   if (!email || !password || !name) {
@@ -19,7 +18,7 @@ exports.signup = async (req, res) => {
     }
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = await userModel.createUser(email, hashed, name); // Make sure your model supports this
+    const user = await userModel.createUser(email, hashed, name);
 
     res.status(201).json({ message: 'User created successfully', user });
   } catch (error) {
@@ -28,7 +27,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -43,7 +42,7 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.forgotPassword = async (req, res) => {
+export const forgotPassword = async (req, res) => {
   const { email } = req.body;
   const user = await userModel.findUserByEmail(email);
   if (!user) return res.status(404).json({ message: 'Email not found' });
@@ -55,7 +54,47 @@ exports.forgotPassword = async (req, res) => {
   res.json({ message: 'Reset code sent' });
 };
 
-exports.resetPassword = async (req, res) => {
+export const verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+  const user = await userModel.findUserByEmail(email);
+  
+  if (!user) {
+    return res.status(404).json({ message: 'Email not found' });
+  }
+  
+  if (!user.reset_code || user.reset_code !== otp) {
+    return res.status(400).json({ message: 'Invalid OTP' });
+  }
+  
+  if (new Date() > user.reset_code_expires) {
+    return res.status(400).json({ message: 'OTP has expired' });
+  }
+  
+  res.json({ message: 'OTP verified successfully' });
+};
+
+export const verifyOTPReset = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+  const user = await userModel.findUserByEmail(email);
+  
+  if (!user) {
+    return res.status(404).json({ message: 'Email not found' });
+  }
+  
+  if (!user.reset_code || user.reset_code !== otp) {
+    return res.status(400).json({ message: 'Invalid OTP' });
+  }
+  
+  if (new Date() > user.reset_code_expires) {
+    return res.status(400).json({ message: 'OTP has expired' });
+  }
+  
+  const hashed = await bcrypt.hash(newPassword, 10);
+  await userModel.resetPassword(email, hashed);
+  res.json({ message: 'Password reset successful' });
+};
+
+export const resetPassword = async (req, res) => {
   const { email, code, newPassword } = req.body;
   const user = await userModel.findUserByEmail(email);
   if (!user || user.reset_code !== code || new Date() > user.reset_code_expires) {
@@ -67,26 +106,25 @@ exports.resetPassword = async (req, res) => {
   res.json({ message: 'Password reset successful' });
 };
 
-exports.getName = async (req, res) => {
+export const getName = async (req, res) => {
   const { email } = req.body;
-  const {name ,id} = await userModel.findNameByEmail(email);
+  const {name, id} = await userModel.findNameByEmail(email);
   res.json({name: name, id: id});
 };
 
-exports.validateToken = async (req, res) => {
+export const validateToken = async (req, res) => {
   res.status(200).json({ message: 'Token is valid' });
-}
+};
 
-exports.deleteAccount = async (req, res) => {
+export const deleteAccount = async (req, res) => {
   const { email } = req.body;
   await userModel.deleteUser(email);
   res.json({ message: 'Account deleted successfully' });
-}
+};
 
-exports.changePassword = async (req, res) => {
+export const changePassword = async (req, res) => {
   const { email, currentPassword, newPassword } = req.body;
 
-  // Check if all fields are provided
   if (!email || !currentPassword || !newPassword) {
     return res.status(400).json({ message: 'براہ کرم تمام فیلڈز مکمل کریں۔' });
   }
@@ -97,17 +135,13 @@ exports.changePassword = async (req, res) => {
       return res.status(404).json({ message: 'صارف نہیں ملا۔' });
     }
 
-    // Correct way: Compare plain oldPassword with stored hashed password
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
 
     if (!isPasswordValid) {
       return res.status(400).json({ message: 'پرانا پاسورڈ درست نہیں ہے۔' });
     }
 
-    // Hash the new password now
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update password in database
     await userModel.changePassword(email, hashedNewPassword);
 
     res.json({ message: 'پاسورڈ کامیابی سے تبدیل ہو گیا۔' });
@@ -115,5 +149,21 @@ exports.changePassword = async (req, res) => {
   } catch (error) {
     console.error('Change password error:', error);
     res.status(500).json({ message: 'سرور کی خرابی۔ براہ کرم بعد میں کوشش کریں۔' });
+  }
+};
+
+// Test email endpoint for debugging
+export const testEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+    
+    await sendResetCode(email, '123456');
+    res.json({ message: 'Test email sent successfully' });
+  } catch (error) {
+    console.error('Test email error:', error);
+    res.status(500).json({ message: 'Email sending failed', error: error.message });
   }
 };

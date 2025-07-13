@@ -40,16 +40,22 @@ const ChatDetailScreen = ({ route, navigation }) => {
         }
 
         const formattedMessages = fetchedMessages.map(message => {
-          console.log('Processing message:', message);
-          return {
-            id: message.id || message.message_id, // Try both possible ID fields
-            text: message.content || message.text, // Try both possible content fields
-            isUser: message.sender === 'user' || message.sender === 'User', // Check both cases
-            timestamp: message.created_at ? 
-              new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) :
-              'Unknown time'
-          };
-        });
+  const createdAt = message.created_at ? new Date(message.created_at) : null;
+  return {
+    id: message.id || message.message_id,
+    text: message.content || message.text,
+    isUser: message.sender === 'user' || message.sender === 'User',
+    createdAt, // keep Date object for sorting
+    timestamp: createdAt
+      ? createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : 'Unknown time',
+  };
+});
+
+// Sort using the createdAt field
+const sortedMessages = formattedMessages.sort((a, b) => a.createdAt - b.createdAt);
+setMessages(sortedMessages);
+
 
         console.log('Formatted messages:', formattedMessages);
         setMessages(formattedMessages.sort((a, b) => a.timestamp - b.timestamp));
@@ -91,7 +97,10 @@ const ChatDetailScreen = ({ route, navigation }) => {
         ]}>
           {item.text}
         </Text>
-        <Text style={styles.timestamp}>{item.timestamp}</Text>
+        <Text style={[
+          styles.timestamp,
+          item.isUser ? styles.userTimestamp : styles.aiTimestamp,
+        ]}>{item.timestamp}</Text>
       </View>
     );
   };
@@ -162,12 +171,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   userMessage: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#006A71',
     alignSelf: 'flex-end',
     borderBottomRightRadius: 5,
   },
   aiMessage: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#F2EFE7',
     alignSelf: 'flex-start',
     borderBottomLeftRadius: 5,
   },
@@ -179,11 +188,23 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   aiMessageText: {
-    color: '#333',
+    color: '#006A71',
   },
   timestamp: {
     fontSize: 10,
-    color: '#999',
+    color: '#ffffffff',
+    marginTop: 5,
+    alignSelf: 'flex-end',
+  },
+  ueserTimestamp: {
+    fontSize: 10,
+    color: '#ffffffff',
+    marginTop: 5,
+    alignSelf: 'flex-end',
+  },
+  aiTimestamp: {
+    fontSize: 10,
+    color: '#006A71',
     marginTop: 5,
     alignSelf: 'flex-end',
   },
