@@ -1,84 +1,100 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import api from '../../utils/api';
 
 const ChatDetailScreen = ({ route, navigation }) => {
   const { chatId } = route.params;
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Sample chat messages - replace with actual data from your backend
-  const chatMessages = [
-    {
-      id: '1',
-      text: 'Hi, I\'ve been feeling anxious lately. Can you help me?',
-      isUser: true,
-      timestamp: '10:30 AM',
-    },
-    {
-      id: '2',
-      text: 'Of course, I\'m here to help. Can you tell me more about what\'s causing your anxiety?',
-      isUser: false,
-      timestamp: '10:31 AM',
-    },
-    {
-      id: '3',
-      text: 'I have a big presentation at work tomorrow and I\'m really nervous about it.',
-      isUser: true,
-      timestamp: '10:32 AM',
-    },
-    {
-      id: '4',
-      text: 'That\'s a common source of anxiety. Let\'s talk about some techniques that might help you manage this feeling.',
-      isUser: false,
-      timestamp: '10:33 AM',
-    },
-    {
-      id: '5',
-      text: 'What kind of techniques?',
-      isUser: true,
-      timestamp: '10:34 AM',
-    },
-    {
-      id: '6',
-      text: 'Deep breathing exercises can be very effective. Try inhaling for 4 counts, holding for 4, and exhaling for 4. This helps calm your nervous system.',
-      isUser: false,
-      timestamp: '10:35 AM',
-    },
-    {
-      id: '7',
-      text: 'I\'ll try that. Any other suggestions?',
-      isUser: true,
-      timestamp: '10:36 AM',
-    },
-    {
-      id: '8',
-      text: 'Yes, visualization can help too. Imagine yourself giving the presentation successfully. Also, remember that some anxiety is normal and can actually improve performance.',
-      isUser: false,
-      timestamp: '10:37 AM',
-    },
-  ];
+  useEffect(() => {
+    const fetchMessages = async () => {
+      console.log('Starting to fetch messages for chat ID:', chatId);
+      setLoading(true);
+      try {
+        // Log the full API URL being called
+        const apiUrl = `/chat/messages/${chatId}`;
+        console.log('Calling API endpoint:', apiUrl);
+        
+        const response = await api.get(apiUrl);
+        console.log('API Response received:', response);
+        console.log('Response data:', response.data);
+        
+        const fetchedMessages = response.data;
+        console.log('Raw fetched messages:', fetchedMessages);
 
-  const renderMessage = ({ item }) => (
-    <View
-      style={[
-        styles.messageContainer,
-        item.isUser ? styles.userMessage : styles.aiMessage,
-      ]}
-    >
-      <Text style={[
-        styles.messageText,
-        item.isUser ? styles.userMessageText : styles.aiMessageText,
-      ]}>
-        {item.text}
-      </Text>
-      <Text style={styles.timestamp}>{item.timestamp}</Text>
-    </View>
-  );
+        if (!Array.isArray(fetchedMessages)) {
+          console.error('Fetched messages is not an array:', fetchedMessages);
+          Alert.alert('Error', 'Invalid message data received from server');
+          setLoading(false);
+          return;
+        }
+
+        const formattedMessages = fetchedMessages.map(message => {
+          console.log('Processing message:', message);
+          return {
+            id: message.id || message.message_id, // Try both possible ID fields
+            text: message.content || message.text, // Try both possible content fields
+            isUser: message.sender === 'user' || message.sender === 'User', // Check both cases
+            timestamp: message.created_at ? 
+              new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) :
+              'Unknown time'
+          };
+        });
+
+        console.log('Formatted messages:', formattedMessages);
+        setMessages(formattedMessages.sort((a, b) => a.timestamp - b.timestamp));
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        setLoading(false);
+        Alert.alert('Error', `Failed to load messages: ${error.message}`);
+      }
+    };
+
+    if (chatId) {
+      console.log('Chat ID available, starting fetch:', chatId);
+      fetchMessages();
+    } else {
+      console.error('No chat ID provided');
+      Alert.alert('Error', 'No chat ID provided');
+      setLoading(false);
+    }
+  }, [chatId]);
+
+  const renderMessage = ({ item }) => {
+    console.log('Rendering message:', item);
+    return (
+      <View
+        style={[
+          styles.messageContainer,
+          item.isUser ? styles.userMessage : styles.aiMessage,
+        ]}
+      >
+        <Text style={[
+          styles.messageText,
+          item.isUser ? styles.userMessageText : styles.aiMessageText,
+        ]}>
+          {item.text}
+        </Text>
+        <Text style={styles.timestamp}>{item.timestamp}</Text>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -89,24 +105,25 @@ const ChatDetailScreen = ({ route, navigation }) => {
         >
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Chat History</Text>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => {
-            // TODO: Implement delete functionality
-            navigation.goBack();
-          }}
-        >
-          <Ionicons name="trash-outline" size={24} color="#FF3B30" />
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Conversation History</Text>
       </View>
 
-      <FlatList
-        data={chatMessages}
-        renderItem={renderMessage}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.messagesList}
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      ) : messages.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No messages found</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={item => item.id?.toString() || Math.random().toString()}
+          contentContainerStyle={styles.messagesList}
+        />
+      )}
     </View>
   );
 };
@@ -120,7 +137,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 20,
     paddingHorizontal: 15,
     backgroundColor: '#ffffff',
@@ -134,9 +151,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
-  },
-  deleteButton: {
-    padding: 5,
   },
   messagesList: {
     padding: 15,
@@ -172,6 +186,20 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 5,
     alignSelf: 'flex-end',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
   },
 });
 

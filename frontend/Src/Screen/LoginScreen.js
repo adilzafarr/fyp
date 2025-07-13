@@ -34,10 +34,10 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
   
-    if (password.length < 6) {
-      alert("پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے");
-      return;
-    }
+    // if (password.length < 6) {
+    //   alert("پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے");
+    //   return;
+    // }
   
     setLoading(true);
   
@@ -58,7 +58,7 @@ const LoginScreen = ({ navigation }) => {
       if (error.response?.data?.message) {
         alert(error.response.data.message);
       } else {
-        alert("لاگ ان میں مسئلہ ہے، دوبارہ کوشش کریں");
+        alert("آپ نے غلط ای میل یا پاس ورڈ درج کیا ہے ، دوبارہ کوشش کریں");
       }
       setPassword('');
     } finally {

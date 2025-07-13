@@ -101,9 +101,6 @@ const ChangePassword = ({ navigation }) => {
             placeholder="موجودہ پاسورڈ درج کریں"
             placeholderTextColor="#666"
           />
-            {currentPassword.length > 0 && currentPassword.length < 6 && (
-              <Text style={styles.errorText}>پاسورڈ کم از کم 6 حروف کا ہونا چاہیے</Text>
-            )}
         </View>
 
         <View style={styles.inputContainer}>
@@ -164,7 +161,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 8,
-    paddingTop: 0,
+    paddingTop: 16,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',

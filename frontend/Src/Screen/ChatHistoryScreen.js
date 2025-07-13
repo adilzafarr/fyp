@@ -12,144 +12,74 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../../utils/api';
 
 const ChatHistoryScreen = ({ navigation }) => {
   const [chatHistory, setChatHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    setupChatListener();
-    return () => {
-      // Cleanup listener when component unmounts
+    const loadUserIdAndChats = async () => {
+      const storedUserId = await AsyncStorage.getItem('usersId');
+      if (storedUserId) {
+        const parsedUserId = Number(storedUserId);
+        setUserId(parsedUserId);
+        fetchChatHistory(parsedUserId);
+      } else {
+        setLoading(false);
+        Alert.alert('Error', 'User not logged in.');
+      }
     };
+    loadUserIdAndChats();
   }, []);
 
-  const setupChatListener = async () => {
+  const fetchChatHistory = async (currentUserId) => {
+    console.log('Fetching chat history for user ID:', currentUserId);
+    setLoading(true);
     try {
-      const user = my_auth.currentUser;
-      
-      // First try to load from AsyncStorage
-      const storageKey = `chat_data_${user?.uid || 'anonymous'}`;
-      const storedData = await AsyncStorage.getItem(storageKey);
-      let localChats = [];
-      
-      if (storedData) {
-        try {
-          const data = JSON.parse(storedData);
-          localChats = data.map(chat => ({
-            id: chat.chatId,
-            summary: chat.messages[0]?.text?.substring(0, 50) + (chat.messages[0]?.text?.length > 50 ? '...' : '') || 'New Chat',
-            lastMessage: chat.messages[chat.messages.length - 1]?.text || 'No messages',
-            timestamp: new Date(chat.timestamp),
-            messageCount: chat.messages.length
-          }));
-        } catch (parseError) {
-          console.log('Error parsing local storage data:', parseError);
-        }
-      }
+      const response = await api.post('/chat/history', { userId: currentUserId });
+      const data = response.data;
 
-      // Set local chats first
-      setChatHistory(localChats.sort((a, b) => b.timestamp - a.timestamp));
+      const formattedChatHistory = data.map(chat => ({
+        id: chat.conversation_id,
+        summary: chat.last_message ? chat.last_message.substring(0, 50) + (chat.last_message.length > 50 ? '...' : '') : 'New Chat',
+        lastMessage: chat.last_message || 'No messages',
+        timestamp: new Date(chat.created_at),
+        messageCount: chat.message_count || 0,
+      }));
+
+      setChatHistory(formattedChatHistory.sort((a, b) => b.timestamp - a.timestamp));
       setLoading(false);
       setRefreshing(false);
-
-      // Only set up Firebase listener if user is authenticated
-      if (user) {
-        try {
-          const chatsQuery = query(
-            collection(db, 'chats'),
-            where('userId', '==', user.uid),
-            orderBy('updatedAt', 'desc')
-          );
-
-          const unsubscribe = onSnapshot(chatsQuery, (querySnapshot) => {
-            const firebaseChats = [];
-            querySnapshot.forEach((doc) => {
-              const data = doc.data();
-              firebaseChats.push({
-                id: doc.id,
-                summary: data.summary || 'No summary',
-                lastMessage: data.messages?.[data.messages.length - 1]?.text || 'No messages',
-                timestamp: data.updatedAt?.toDate() || new Date(),
-                messageCount: data.messages?.length || 0
-              });
-            });
-
-            // Merge local and Firebase chats, removing duplicates
-            const mergedChats = [...localChats];
-            firebaseChats.forEach(firebaseChat => {
-              const existingIndex = mergedChats.findIndex(chat => chat.id === firebaseChat.id);
-              if (existingIndex === -1) {
-                mergedChats.push(firebaseChat);
-              } else if (firebaseChat.timestamp > mergedChats[existingIndex].timestamp) {
-                mergedChats[existingIndex] = firebaseChat;
-              }
-            });
-
-            setChatHistory(mergedChats.sort((a, b) => b.timestamp - a.timestamp));
-            setLoading(false);
-            setRefreshing(false);
-          }, (error) => {
-            console.log('Firebase listener error:', error);
-            // Don't show error to user, just use local data
-            setLoading(false);
-            setRefreshing(false);
-          });
-
-          return unsubscribe;
-        } catch (firebaseError) {
-          console.log('Firebase setup error:', firebaseError);
-          // Don't show error to user, just use local data
-          setLoading(false);
-          setRefreshing(false);
-        }
-      }
     } catch (error) {
-      console.error('Error setting up chat listener:', error);
-      // Don't show error to user, just use local data
+      console.error('Error fetching chat history:', error);
       setLoading(false);
       setRefreshing(false);
+      Alert.alert('Error', 'Failed to load chat history.');
     }
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await setupChatListener();
+    if (userId) {
+      await fetchChatHistory(userId);
+    } else {
+      setRefreshing(false);
+    }
   };
 
   const handleDeleteChat = async (chatId) => {
+    console.log('Deleting chat with ID:', chatId);
+    setChatHistory(prev => prev.filter(chat => chat.id !== chatId));
+
     try {
-      const user = my_auth.currentUser;
-      
-      // Delete from AsyncStorage
-      const storageKey = `chat_data_${user?.uid || 'anonymous'}`;
-      const storedData = await AsyncStorage.getItem(storageKey);
-      if (storedData) {
-        try {
-          const data = JSON.parse(storedData);
-          const updatedData = data.filter(chat => chat.chatId !== chatId);
-          await AsyncStorage.setItem(storageKey, JSON.stringify(updatedData));
-        } catch (parseError) {
-          console.log('Error parsing local storage data:', parseError);
-        }
-      }
-
-      // Update local state
-      setChatHistory(prev => prev.filter(chat => chat.id !== chatId));
-
-      // Only try to delete from Firebase if user is authenticated
-      if (user) {
-        try {
-          await deleteDoc(doc(db, 'chats', chatId));
-        } catch (firebaseError) {
-          console.log('Firebase delete error:', firebaseError);
-          // Don't show error to user, just continue with local deletion
-        }
-      }
+      await api.delete(`/chat/${chatId}`);
+      console.log('Chat deleted successfully on backend.');
     } catch (error) {
-      console.error('Error deleting chat:', error);
-      // Don't show error to user
+      console.error('Error deleting chat on backend:', error);
+      Alert.alert('Error', 'Failed to delete chat on server.');
     }
   };
 
@@ -157,7 +87,7 @@ const ChatHistoryScreen = ({ navigation }) => {
     <TouchableOpacity
       style={styles.chatItem}
       onPress={() => {
-        navigation.navigate('ChatTab', { chatId: item.id });
+        navigation.navigate('ChatDetail', { chatId: item.id });
       }}
     >
       <View style={styles.chatContent}>
@@ -168,7 +98,7 @@ const ChatHistoryScreen = ({ navigation }) => {
           {item.lastMessage}
         </Text>
         <Text style={styles.timestamp}>
-          {item.timestamp.toLocaleDateString()} - {item.messageCount} messages
+          {item.timestamp instanceof Date && !isNaN(item.timestamp) ? item.timestamp.toLocaleDateString() : 'Invalid Date'} - {item.messageCount} messages
         </Text>
       </View>
       <TouchableOpacity
@@ -205,7 +135,7 @@ const ChatHistoryScreen = ({ navigation }) => {
         <FlatList
           data={chatHistory}
           renderItem={renderChatItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

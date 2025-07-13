@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   StatusBar,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
 const ArticleDetailScreen = ({ route }) => {

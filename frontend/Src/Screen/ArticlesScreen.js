@@ -11,7 +11,6 @@ import {
   TextInput,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
 import articlesData from '../../Data/Articles/articles.json';
 
 const ArticlesScreen = () => {
@@ -150,7 +149,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 8,
-    paddingTop: 0,
+    paddingTop: 16,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',

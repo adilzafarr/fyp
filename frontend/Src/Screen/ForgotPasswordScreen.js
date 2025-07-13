@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
+import api from '../../utils/api';
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -15,48 +17,57 @@ const ForgotPasswordScreen = ({ navigation }) => {
   const handleResetPassword = async () => {
     // Validate email
     if (!email || email.trim() === '') {
-      alert("براہ کرم اپنا ای میل ایڈریس درج کریں");
+      Alert.alert("فیلد ایمیل خالی است", "براہ کرم اپنا ای میل ایڈریس درج کریں");
       return;
     }
 
     // Email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert("براہ کرم درست ای میل ایڈریس درج کریں");
+      Alert.alert("فرمت ایمیل نامعتبر", "براہ کرم درست ای میل ایڈریس درج کریں");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Send reset email
-      await sendPasswordResetEmail(my_auth, email.trim());
-      
-      // Show success message
-      alert("پاس ورڈ ری سیٹ کرنے والی ای میل بھیج دی گئی ہے۔ براہ کرم اپنی ای میل ان باکس اور اسپیم فولڈر چیک کریں۔");
-      setEmail(''); // Clear the email field
-      navigation.navigate('Login');
-      
+      // --- Removed Firebase password reset code ---
+      // await sendPasswordResetEmail(my_auth, email.trim());
+      // --- New backend API call for password reset ---
+      const response = await api.post('/auth/forgot-password', { email: email.trim() });
+
+      if (response.status === 200) {
+        // Navigate to OTP verification screen
+        navigation.navigate('OTPVerification', { email: email.trim() });
+      } else {
+        // Handle non-200 responses from backend
+        const errorMessage = response.data.error || 'ری سیٹ ای میل بھیجنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں';
+        Alert.alert("خطا در ارسال ایمیل", errorMessage);
+      }
+
     } catch (error) {
       console.error('Password reset error:', error);
-      let errorMessage = '';
-      
-      // Handle specific error cases
-      switch (error.code) {
-        case 'auth/invalid-email':
-          errorMessage = 'ای میل ایڈریس کا فارمیٹ غلط ہے';
-          break;
-        case 'auth/user-not-found':
-          errorMessage = 'اس ای میل کے ساتھ کوئی اکاؤنٹ موجود نہیں ہے';
-          break;
-        case 'auth/too-many-requests':
-          errorMessage = 'کوششیں بہت زیادہ ہو گئی ہیں۔ براہ کرم کچھ دیر بعد دوبارہ کوشش کریں';
-          break;
-        default:
-          errorMessage = 'ری سیٹ ای میل بھیجنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں';
+      // Handle network errors or other exceptions
+      let errorMessage = 'ری سیٹ ای میل بھیجنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں';
+
+      // Check if the error is an Axios error with a response from the server
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        errorMessage = error.response.data.error || error.message || errorMessage;
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error request:', error.request);
+        errorMessage = 'سرور سے رابطہ نہیں ہو سکا۔ براہ کرم بعد میں دوبارہ کوشش کریں۔' + error.message;
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', error.message);
+        errorMessage = 'ری سیٹ ای میل بھیجنے میں ناکامی: ' + error.message;
       }
       
-      alert(errorMessage);
+      Alert.alert("خطا", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -138,6 +149,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: '#ddd',
+    color: '#333',
   },
   inputDisabled: {
     opacity: 0.7,

@@ -11,7 +11,6 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import api from '../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = ({ navigation }) => {
@@ -68,6 +67,12 @@ const ProfileScreen = ({ navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.headerSettingsButton}
+          onPress={() => navigation.navigate('AccountSettings')}
+        >
+          <Ionicons name="settings-outline" size={24} color="#333" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>پروفائل</Text>
       </View>
 
@@ -79,25 +84,8 @@ const ProfileScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.infoItem}>
             <Text style={styles.infoValue}>{userData.email}</Text>
-            <TouchableOpacity
-              style={styles.settingsItem}
-              onPress={() => navigation.navigate('AccountSettings')}
-            >
-              <View style={styles.settingsContent}>
-                <Ionicons
-                  name="settings-outline"
-                  size={20}
-                  color="#333"
-                  style={styles.settingsIcon}
-                />
-                <Text style={styles.settingsText}>اکاؤنٹ سیٹنگز</Text>
-              </View>
-              <Ionicons name="chevron-forward-outline" size={20} color="#888" />
-            </TouchableOpacity>
           </View>
         </View>
-
-        
 
         <TouchableOpacity
           style={[styles.logoutButton, styles.buttonWithShadow]}
@@ -129,19 +117,22 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
     alignItems: 'center',
     padding: 8,
-    paddingTop: 0,
+    paddingTop: 16,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
+  headerSettingsButton: {
+    marginRight: 10,
+  },
   headerTitle: {
+    flex: 1,
     fontSize: 20,
     fontWeight: 'bold',
     color: '#006A71',
-    marginTop: 0,
+    textAlign: 'right',
   },
   userNameContainer: {
     width: '100%',
@@ -187,42 +178,23 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 16,
     color: '#333',
-    textAlign: 'right',
+    textAlign: 'center',
     alignSelf: 'stretch',
-  },
-  settingsItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 10,
-    paddingVertical: 8,
-    borderTopWidth: 0,
-  },
-  settingsContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  settingsIcon: {
-    marginRight: 8,
-  },
-  settingsText: {
-    fontSize: 16,
-    color: '#333',
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
-    padding: 15,
+    padding: 20,
     borderRadius: 8,
-    margin: 20,
+    margin: 200,
     borderWidth: 1,
     borderColor: '#FF3B30',
   },
   logoutButtonText: {
     color: '#FF3B30',
-    fontSize: 16,
+    fontSize: 18,
     marginLeft: 10,
   },
   buttonWithShadow: {

@@ -13,18 +13,12 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system';
-import * as Asset from 'expo-asset';
-import { Asset as ExpoAsset } from 'expo-asset';
-import { my_auth, db } from '../components/Firebase';
-import { doc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Use the correct path to the data.json file
-const dataPath = require('../../data.json');
+import api from '../../utils/api';
 
 const MoodTrackerScreen = () => {
   const [moodHistory, setMoodHistory] = useState([]);
+  const [moodHistory2, setMoodHistory2] = useState([]);
   const [topEmotion, setTopEmotion] = useState(null);
   const [popupVisible, setPopupVisible] = useState(false);
   const [monthlyData, setMonthlyData] = useState([]);
@@ -33,87 +27,77 @@ const MoodTrackerScreen = () => {
   const [currentMonthEmotions, setCurrentMonthEmotions] = useState([]);
   const [userName, setUserName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [userID, setUserID] = useState(-1);
 
   const moods = [
-    { name: 'Happy', icon: 'happy', color: '#81C784' },
-    { name: 'Neutral', icon: 'leaf', color: '#B0BEC5' },
-    { name: 'Angry', icon: 'flame', color: '#E57373' },
-    { name: 'Frustrated', icon: 'warning', color: '#BA68C8' },
-    { name: 'Dissatisfied', icon: 'close-circle', color: '#FFB74D' },
+    { name: 'Neutral', icon: 'leaf', color: '#B0BEC5', int:0 },
+    { name: 'Angry', icon: 'flame', color: '#E57373', int:1 },
+    { name: 'Frustrated', icon: 'warning', color: '#BA68C8', int:2 },
+    { name: 'Dissatisfied', icon: 'close-circle', color: '#FFB74D', int:3 },
+    { name: 'Happy', icon: 'happy', color: '#81C784', int:4 }
   ];
 
   useEffect(() => {
-    clearCache(); // Clear the cache first
-    loadData();
-    checkAndAddRandomMoodForToday();
-    loadUserName();
+    clearCache();
+    const init = async () => {
+      const id = await loadUserName(); // get user ID directly
+      if (id !== -1) {
+        await loadData(id); // pass userId explicitly
+      }
+      checkAndAddRandomMoodForToday();
+    };
+    init();
   }, []);
+  
 
   // Load user name from storage or API
   const loadUserName = async () => {
     try {
-      const user = my_auth.currentUser;
-      if (!user) {
-        setUserName("صارف"); // Default name in Urdu
-        return;
-      }
-
-      // First try to get the name from Firestore
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        if (userData.name) {
-          setUserName(userData.name);
-        } else {
-          // If no name in Firestore, use the displayName from auth
-          setUserName(user.displayName || "صارف");
-        }
-      } else {
-        // If no document exists, use the displayName from auth
-        setUserName(user.displayName || "صارف");
-      }
+      const username = await AsyncStorage.getItem('usersName');
+      const usersId = await AsyncStorage.getItem('usersId');
+      const parsedId = Number(usersId);
+      setUserID(parsedId); // still update state for other UI use
+      setUserName(username || "صارف");
+      return parsedId;
     } catch (error) {
       console.error("Error loading user name:", error);
-      setUserName("صارف"); // Default name in Urdu
+      setUserName("صارف");
+      return -1;
     }
   };
+  
+  
 
-  const loadData = async () => {
+  const loadData = async (userId) => {
     try {
       setIsLoading(true);
-      let data;
+      const response = await api.post('/mood/get-mood-history', { userId });
+      const data = response.data;
+  
+      const mappedData = data.map(entry => {
+        const moodObj = moods.find(m => m.int === entry.mood);
+        const formattedDate = new Date(entry.date).toISOString().split('T')[0]; // "YYYY-MM-DD"
+  
+        return {
+          mood: moodObj ? moodObj.name : 'Unknown',
+          date: formattedDate
+        };
+      });
+  
+      console.log('Mapped data:', mappedData);
+  
+      await AsyncStorage.setItem('moodHistory', JSON.stringify(mappedData));
+      setMoodHistory(mappedData);
       
-      // Try to load from AsyncStorage first
-      const storedData = await AsyncStorage.getItem('moodHistory');
-      if (storedData) {
-        data = JSON.parse(storedData);
-        // Filter out any moods that are not in our current moods array
-        data = data.filter(entry => moods.some(m => m.name === entry.mood));
-        // Save the filtered data back to AsyncStorage
-        await AsyncStorage.setItem('moodHistory', JSON.stringify(data));
-      } else {
-        // If no stored data, use the default data
-        data = dataPath;
-        // Filter the default data as well
-        data = data.filter(entry => moods.some(m => m.name === entry.mood));
-        // Save to AsyncStorage for future use
-        await AsyncStorage.setItem('moodHistory', JSON.stringify(data));
-      }
-      
-      setMoodHistory(data);
-      calculateTopEmotion(data);
-      updateCurrentMonthEmotions(data);
     } catch (e) {
       console.error('Error loading data:', e);
-      // Fallback to filtered default data if there's an error
-      const filteredData = dataPath.filter(entry => moods.some(m => m.name === entry.mood));
-      setMoodHistory(filteredData);
-      calculateTopEmotion(filteredData);
-      updateCurrentMonthEmotions(filteredData);
     } finally {
       setIsLoading(false);
     }
   };
+  
+  
+  
 
   // Check if today's mood exists in the data, if not add a random one
   const checkAndAddRandomMoodForToday = () => {
@@ -128,8 +112,8 @@ const MoodTrackerScreen = () => {
       const randomMood = moods[Math.floor(Math.random() * moods.length)].name;
       
       // Add new entry
-      const newMoodHistory = [...moodHistory, { date: dateStr, mood: randomMood }];
-      setMoodHistory(newMoodHistory);
+      const newMoodHistory = [...moodHistory2, { date: dateStr, mood: randomMood }];
+      setMoodHistory2(newMoodHistory);
       calculateTopEmotion(newMoodHistory);
       updateCurrentMonthEmotions(newMoodHistory);
     }
@@ -145,7 +129,7 @@ const MoodTrackerScreen = () => {
       setTopEmotion(topMood[0]);
     }
   };
-
+ 
   // Update emotions for the current month
   const updateCurrentMonthEmotions = (history) => {
     const today = new Date();
@@ -170,7 +154,7 @@ const MoodTrackerScreen = () => {
     });
     return monthly;
   };
-
+  
   const openMonthDetail = (monthKey) => {
     const grouped = groupByMonth();
     const moods = grouped[monthKey];
@@ -438,7 +422,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-    paddingTop: 0,
+    paddingTop: 16,
   },
   sectionTitle: { 
     fontSize: 18, 

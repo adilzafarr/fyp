@@ -19,7 +19,7 @@ const RegisterScreen = ({ navigation }) => {
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return emailRegex.test(email) && email.toLowerCase().endsWith('@gmail.com');
   };
 
   const handleRegister = async () => {
@@ -95,6 +95,9 @@ const RegisterScreen = ({ navigation }) => {
           editable={!loading}
           placeholderTextColor="#666666"
         />
+        {password.length > 0 && password.length < 6 && (
+              <Text style={styles.errorText}>پاسورڈ کم از کم 6 حروف کا ہونا چاہیے</Text>
+            )}
 
         <TextInput
           style={styles.input}
@@ -155,6 +158,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 15,
     fontSize: 16,
+    textAlign: 'right',
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    marginTop: 5,
     textAlign: 'right',
   },
   button: {

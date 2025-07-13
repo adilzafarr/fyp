@@ -6,3 +6,8 @@ frontend/.gitignore
 
 Backend/node_modules
 Backend/.gitignore
+Backend/.env
+
+ml/ml_pipeline
+ml/__pycache__
+ml/mbert

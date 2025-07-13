@@ -14,6 +14,8 @@ import WelcomeScreen from '../Screen/WelcomeScreen';
 import LoginScreen from '../Screen/LoginScreen';
 import RegisterScreen from '../Screen/RegisterScreen';
 import ForgotPasswordScreen from '../Screen/ForgotPasswordScreen';
+import OTPVerificationScreen from '../Screen/OTPVerificationScreen';
+import ResetPasswordScreen from '../Screen/ResetPasswordScreen';
 import HomeScreen from '../Screen/HomeScreen';
 import ChatScreen from '../Screen/ChatScreen';
 import ChatHistoryScreen from '../Screen/ChatHistoryScreen';
@@ -38,6 +40,8 @@ const AuthStack = () => {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
+      <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
     </Stack.Navigator>
   );
 };
